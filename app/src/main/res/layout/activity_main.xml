@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="data"
+            type="com.af.camerap.MainUI" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".MainActivity">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="摄像头选择" />
+
+        <CheckBox
+            android:id="@+id/checkbox_front"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="@{data.front}"
+            android:text="前置摄像头" />
+
+        <CheckBox
+            android:id="@+id/checkbox_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="@{!data.front}"
+            android:text="后置摄像头" />
+
+
+        <TextView
+            android:id="@+id/preview_take"
+            android:text="相机预览，拍照"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"/>
+
+        <TextView
+            android:id="@+id/float_preview"
+            android:text="悬浮窗预览"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"/>
+
+    </LinearLayout>
+</layout>
