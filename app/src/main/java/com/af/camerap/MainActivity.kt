@@ -1,14 +1,14 @@
 package com.af.camerap
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.PixelFormat
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.util.Size
-import android.view.Gravity
-import android.view.WindowManager
+import android.view.*
 import android.widget.CompoundButton
-import android.widget.LinearLayout
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
@@ -17,8 +17,10 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.databinding.DataBindingUtil
 import com.af.camerap.databinding.ActivityMainBinding
+import com.af.camerap.databinding.ViewFloatBinding
 import com.google.common.util.concurrent.ListenableFuture
 
+private const val long_click_time = 100//长按时间后，view可以拖动
 
 class MainActivity : BaseActivity() {
 
@@ -66,6 +68,7 @@ class MainActivity : BaseActivity() {
     }
 
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun showFloat() {
         val w = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             windowManager.currentWindowMetrics.bounds.width()
@@ -78,7 +81,7 @@ class MainActivity : BaseActivity() {
             windowManager.defaultDisplay.height
         }
         val lp = WindowManager.LayoutParams()
-        lp.gravity = Gravity.TOP or Gravity.END
+        lp.gravity = Gravity.TOP or Gravity.START
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         } else {
@@ -87,25 +90,82 @@ class MainActivity : BaseActivity() {
         lp.format = PixelFormat.RGBA_8888
         lp.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
-        lp.x = 0
-        lp.y = 0
+        var x = 0
+        var y = 0
+        lp.x = x
+        lp.y = y
         // 设置悬浮窗口长宽数据
         lp.width = (0.3 * w).toInt()
         lp.height = (0.3 * h).toInt()
-        val ll = LinearLayout(this)
-        val pv = PreviewView(this)
-        ll.addView(pv)
-        ll.setOnClickListener {
-            windowManager.removeView(ll)
+
+//        val view=LayoutInflater.from(this).inflate(R.layout.view_float,null)
+        val binding = ViewFloatBinding.inflate(layoutInflater, null, false)
+        val view = binding.root
+
+
+        binding.tvVfClose.setOnClickListener {
+            windowManager.removeView(view)
             customLifecycle.doOnDestroyed()
         }
-        windowManager.addView(ll, lp)
+        var downTime = 0L
+        var canDrag = false
+        var touch = false
+        var downX = 0f
+        var downY = 0f
 
-        bindView(pv)
+
+        binding.tvVfDrag.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    d(" downnnnnnnn   x=${event.x}  y=${event.y}    rx=${event.rawX}  ry=${event.rawY}")
+                    touch = false
+                    downTime = System.currentTimeMillis()
+                    downX = event.rawX
+                    downY = event.rawY
+                    return@setOnTouchListener true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    d(" move  eeee ee e   x=${event.x}  y=${event.y}    rx=${event.rawX}  ry=${event.rawY}")
+
+                    if (canDrag) {
+                        touch = true
+
+                        lp.x = x + (event.rawX - downX).toInt()
+                        lp.y = y + (event.rawY - downY).toInt()
+
+                        windowManager.updateViewLayout(view, lp)
+                    } else {
+                        val cur = System.currentTimeMillis()
+                        canDrag = cur - downTime >= long_click_time
+                    }
+
+                }
+                MotionEvent.ACTION_UP -> {
+                    d("up up up up")
+                    if (canDrag) {
+                        x = (event.rawX - event.x).toInt()
+                        y =
+                            (event.rawY - event.y).toInt() - getStatusBarHeight() - binding.pvVfPre.height
+                    }
+                    canDrag = false
+
+                }
+            }
+            touch
+        }
+        windowManager.addView(view, lp)
+
+        bindView(binding.pvVfPre)
 
     }
 
-    fun bindView(previewView: PreviewView) {
+    private fun getStatusBarHeight(): Int {
+        val rectangle = Rect()
+        window.decorView.getWindowVisibleDisplayFrame(rectangle)
+        return rectangle.top
+    }
+
+    private fun bindView(previewView: PreviewView) {
         // Camera provider is now guaranteed to be available
         val cameraProvider = cameraProviderFuture.get()
 

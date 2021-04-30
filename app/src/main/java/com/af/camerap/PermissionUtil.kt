@@ -46,7 +46,7 @@ fun requestAllPermissions(activity: BaseActivity) {
 }
 
 fun requestAllSpecialPermissions(activity: BaseActivity) {
-    //todo 跳转到特殊权限界面前，可以先弹一个说明dialog，用户同意后再到权限申请界面
+    //todo 跳转到特殊权限界面之前，可以先弹一个说明dialog，用户同意后再到权限申请界面
     if (!checkSpecialPermission(SPECIAL_OVERLAY)) {
         requestSpecialPermission(
             activity,
