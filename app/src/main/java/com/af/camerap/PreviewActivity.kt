@@ -8,6 +8,7 @@ import android.os.Environment.DIRECTORY_PICTURES
 import android.provider.MediaStore
 import android.util.Size
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -109,7 +110,6 @@ class PreviewActivity : AppCompatActivity() {
     }
 
 
-
     private fun takePicture() {
 
         val outputFileOptions =
@@ -122,8 +122,9 @@ class PreviewActivity : AppCompatActivity() {
 
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     d("take Picture  onImageSaved  " + outputFileResults.savedUri + "  currentPhotoPath =$currentPhotoPath")
+                    Toast.makeText(this@PreviewActivity, "save success", Toast.LENGTH_LONG).show()
 //                   dispatchTakePictureIntent()
-                    galleryAddPic()
+//                    galleryAddPic()
                 }
             })
     }
