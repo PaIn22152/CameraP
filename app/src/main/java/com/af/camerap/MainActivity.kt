@@ -36,6 +36,9 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
 
+//        lifecycle.addObserver(MyLifecycleObserver())
+        lifecycle.addObserver(MyLifecycleEventObserver())
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         data = MainUI()
         binding.data = data
